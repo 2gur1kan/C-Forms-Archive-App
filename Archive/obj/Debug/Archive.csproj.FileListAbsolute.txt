@@ -1,0 +1,10 @@
+C:\Users\2gur1\source\repos\Archive\bin\Debug\Archive.exe.config
+C:\Users\2gur1\source\repos\Archive\bin\Debug\Archive.exe
+C:\Users\2gur1\source\repos\Archive\bin\Debug\Archive.pdb
+C:\Users\2gur1\source\repos\Archive\obj\Debug\Archive.csproj.AssemblyReference.cache
+C:\Users\2gur1\source\repos\Archive\obj\Debug\Archive.Properties.Resources.resources
+C:\Users\2gur1\source\repos\Archive\obj\Debug\Archive.csproj.GenerateResource.cache
+C:\Users\2gur1\source\repos\Archive\obj\Debug\Archive.csproj.CoreCompileInputs.cache
+C:\Users\2gur1\source\repos\Archive\obj\Debug\Archive.exe
+C:\Users\2gur1\source\repos\Archive\obj\Debug\Archive.pdb
+C:\Users\2gur1\source\repos\Archive\obj\Debug\Archive.SaveForm.resources
