@@ -16,7 +16,7 @@ namespace Archive
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new SaveForm()); // Form1 den oluşturuyor
+            Application.Run(new ArchiveMain()); // burası başlangıç formu olmalı **********************
         }
     }
 }
