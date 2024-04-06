@@ -19,9 +19,10 @@ namespace Archive
         }
 
         // Dosya adını belirle ve dosya yolunu oluştur
-        string archivePath = "Archive\\";
-        string dataPath = "Data\\";
-        public string titleDataBaseName = "Titles.txt";
+        string archivePath = ArchiveMain.archivePath;
+        string dataPath = ArchiveMain.dataPath;
+        string titleDataBaseName = ArchiveMain.titleDataBaseName;
+
         string titlePath;
 
         private void SaveForm_Load(object sender, EventArgs e)
@@ -60,6 +61,28 @@ namespace Archive
                             sw.WriteLine(Title.Text);
                         }
 
+                        try // kalan veriyi kaydeden kısım 
+                        {
+                            string DataPath = Path.Combine(Environment.CurrentDirectory, archivePath + dataPath + Title.Text + ".txt");
+
+                            File.WriteAllText(DataPath, string.Empty);//dosya yazılı ise önceden sıfırlar
+
+                            // StreamWriter nesnesi oluştur ve dosyayı aç
+                            using (StreamWriter sw = new StreamWriter(DataPath, true))
+                            {
+                                // Veriyi dosyaya yaz
+                                sw.WriteLine(Title.Text);
+                                sw.WriteLine(Info.Text);
+                            }
+
+                            MessageBox.Show("Veri başarıyla kaydedildi.", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        catch (Exception ex)
+                        {
+                            // Hata durumunda hata mesajını göster
+                            MessageBox.Show("Hata: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+
                         MessageBox.Show("Başlık başarıyla kaydedildi.", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else
@@ -70,27 +93,6 @@ namespace Archive
                 else
                 {
                     MessageBox.Show("Lütfen en az 3 karakter içeren bir metin girin.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-
-
-                try // kalan veriyi kaydeden kısım 
-                {
-                    string DataPath = Path.Combine(Environment.CurrentDirectory, archivePath + dataPath + Title.Text + ".txt");
-
-                    // StreamWriter nesnesi oluştur ve dosyayı aç
-                    using (StreamWriter sw = new StreamWriter(DataPath, true))
-                    {
-                        // Veriyi dosyaya yaz
-                        sw.WriteLine(Title.Text);
-                        sw.WriteLine(Info.Text);
-                    }
-
-                    MessageBox.Show("Veri başarıyla kaydedildi.", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                catch (Exception ex)
-                {
-                    // Hata durumunda hata mesajını göster
-                    MessageBox.Show("Hata: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
             }

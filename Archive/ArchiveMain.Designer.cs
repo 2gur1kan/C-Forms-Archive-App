@@ -34,6 +34,10 @@ namespace Archive
             this.DetailedSearch = new System.Windows.Forms.Button();
             this.New = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
+            this.Shelf1 = new System.Windows.Forms.Button();
+            this.Shelf2 = new System.Windows.Forms.Button();
+            this.Shelf3 = new System.Windows.Forms.Button();
+            this.Shelf4 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // SearchBar
@@ -55,6 +59,7 @@ namespace Archive
             this.Search.TabIndex = 1;
             this.Search.Text = "Search";
             this.Search.UseVisualStyleBackColor = false;
+            this.Search.Click += new System.EventHandler(this.Search_Click);
             // 
             // DetailedSearch
             // 
@@ -88,12 +93,61 @@ namespace Archive
             this.label1.TabIndex = 4;
             this.label1.Text = "Search Bar";
             // 
+            // Shelf1
+            // 
+            this.Shelf1.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.Shelf1.Location = new System.Drawing.Point(25, 174);
+            this.Shelf1.Name = "Shelf1";
+            this.Shelf1.Size = new System.Drawing.Size(551, 84);
+            this.Shelf1.TabIndex = 5;
+            this.Shelf1.Text = "Empty";
+            this.Shelf1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.Shelf1.UseVisualStyleBackColor = true;
+            this.Shelf1.Click += new System.EventHandler(this.Shelf1_Click);
+            // 
+            // Shelf2
+            // 
+            this.Shelf2.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.Shelf2.Location = new System.Drawing.Point(25, 264);
+            this.Shelf2.Name = "Shelf2";
+            this.Shelf2.Size = new System.Drawing.Size(551, 84);
+            this.Shelf2.TabIndex = 6;
+            this.Shelf2.Text = "Empty";
+            this.Shelf2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.Shelf2.UseVisualStyleBackColor = true;
+            // 
+            // Shelf3
+            // 
+            this.Shelf3.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.Shelf3.Location = new System.Drawing.Point(25, 354);
+            this.Shelf3.Name = "Shelf3";
+            this.Shelf3.Size = new System.Drawing.Size(551, 84);
+            this.Shelf3.TabIndex = 7;
+            this.Shelf3.Text = "Empty";
+            this.Shelf3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.Shelf3.UseVisualStyleBackColor = true;
+            // 
+            // Shelf4
+            // 
+            this.Shelf4.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.Shelf4.Location = new System.Drawing.Point(25, 444);
+            this.Shelf4.Name = "Shelf4";
+            this.Shelf4.Size = new System.Drawing.Size(551, 84);
+            this.Shelf4.TabIndex = 8;
+            this.Shelf4.Text = "Empty";
+            this.Shelf4.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.Shelf4.UseVisualStyleBackColor = true;
+            // 
             // ArchiveMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.ClientSize = new System.Drawing.Size(820, 554);
+            this.Controls.Add(this.Shelf4);
+            this.Controls.Add(this.Shelf3);
+            this.Controls.Add(this.Shelf2);
+            this.Controls.Add(this.Shelf1);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.New);
             this.Controls.Add(this.DetailedSearch);
@@ -114,5 +168,9 @@ namespace Archive
         private System.Windows.Forms.Button DetailedSearch;
         private System.Windows.Forms.Button New;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button Shelf1;
+        private System.Windows.Forms.Button Shelf2;
+        private System.Windows.Forms.Button Shelf3;
+        private System.Windows.Forms.Button Shelf4;
     }
 }
