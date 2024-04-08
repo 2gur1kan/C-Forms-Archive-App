@@ -28,8 +28,11 @@ namespace Archive
         public List<string> Tags = new List<string>();
         public List<Button> Shelfs = new List<Button>();
 
+        List<string> PartialTitle = new List<string>();
+
         private void ArchiveMain_Load(object sender, EventArgs e)
         {
+            Sizer();
             AreRegistrationPlacesActive();
 
             //butonlara hızlı erişim için
@@ -131,6 +134,12 @@ namespace Archive
             
 
         }
+        private void Sizer()
+        {
+            System.Drawing.Rectangle rec = Screen.PrimaryScreen.WorkingArea;
+            this.Size = new System.Drawing.Size(Convert.ToInt32(.5f * rec.Width), Convert.ToInt32(.5f * rec.Height));
+            this.Location = new System.Drawing.Point(10, 10);
+        }
 
         private void AreRegistrationPlacesActive()
         {
@@ -165,39 +174,81 @@ namespace Archive
 
         private void Search_Click(object sender, EventArgs e)
         {
+            string SearchTitle = SearchBar.Text;
 
+            if (!string.IsNullOrEmpty(SearchTitle))
+            {
+                PartialTitle = new List<string>();
+
+                // Arama yapılacak dosyanın yolunu belirtin (titlePath değişkeni)
+                // Örneğin: string titlePath = "dosya_yolu.txt";
+
+                if (File.Exists(titlePath))
+                {
+                    // Dosya mevcut ise, dosyadaki tüm satırları okuyun
+                    string[] lines = File.ReadAllLines(titlePath);
+
+                    // Aranan başlığın tam eşleşmesini arayın
+                    bool isThere = lines.Any(line => line.Equals(SearchTitle));
+
+                    if (isThere)
+                    {
+                        PartialTitle.Add(SearchTitle);
+                    }
+                    
+
+                    {
+                        // Arama metninden gereksiz boşlukları kaldırın
+                        string trimmedSearchTitle = SearchTitle.Trim();
+
+                        // Gereksiz boşlukları kaldırılmış arama metnini büyük-küçük harfe duyarlı olmayan bir şekilde arayın
+                        List<string> partial = lines.Where(line => line.IndexOf(trimmedSearchTitle, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+
+                        if (partial.Any())
+                        {
+                            foreach (var part in partial)
+                            {
+                                if(part != SearchTitle) PartialTitle.Add(part);
+                            }
+                        }
+
+                        if (PartialTitle.Count <= 0)
+                        {
+                            // Herhangi bir eşleşme bulunamadı
+                            MessageBox.Show("Aramanızla ilgili herhangi bir eşleşme bulunamadı.");
+                        }
+                        else
+                        {
+                            SearchResultForm result = new SearchResultForm();
+                            result.PartialTitle = this.PartialTitle;
+                            result.path = Path.Combine(Environment.CurrentDirectory, archivePath + dataPath);
+
+                            result.Show();
+                        }
+                    }
+                }
+                else
+                {
+                    // Dosya mevcut değil ise
+                    MessageBox.Show("Belirtilen dosya bulunamadı: " + titlePath);
+                }
+            }
+            else
+            {
+                // Arama metni boş ise
+                MessageBox.Show("Arama metni boş olamaz.");
+            }
         }
 
         private void Shelf1_Click(object sender, EventArgs e)
         {
-            string[] datas = dataFinder(Shelf1.Text);
 
             Data Dataform = new Data();
 
-            Dataform.titleText = datas[0];
-            Dataform.linkText = datas[1];
-
-            Dataform.InfoText = infoFinder(Shelf1.Text);
+            Dataform.titleText = Shelf1.Text;
+            Dataform.path = Path.Combine(Environment.CurrentDirectory, archivePath + dataPath + Shelf1.Text);
 
             Dataform.Show();
-        }
-
-        private string[] dataFinder(string title)
-        {
-            string DataPath = Path.Combine(Environment.CurrentDirectory, archivePath + dataPath + title + "\\Data.txt");
-
-            string[] Datas = File.ReadAllLines(DataPath);
-
-            return Datas;
-        }
-
-        private string infoFinder(string title)
-        {
-            string DataPath = Path.Combine(Environment.CurrentDirectory, archivePath + dataPath + title + "\\Info.txt");
-
-            string Datas = File.ReadAllText(DataPath);
-
-            return Datas;
         }
     }
 }

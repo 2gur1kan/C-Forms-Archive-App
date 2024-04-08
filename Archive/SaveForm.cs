@@ -30,6 +30,8 @@ namespace Archive
 
         private void SaveForm_Load(object sender, EventArgs e)
         {
+            Sizer();
+
             //dosya adına sahip bir kolasör vermı ona bakar
             titlePath = Path.Combine(Environment.CurrentDirectory, archivePath + titleDataBaseName);
 
@@ -52,6 +54,13 @@ namespace Archive
             {
                 Tags.Items.Add(tag);
             }
+        }
+
+        private void Sizer()
+        {
+            System.Drawing.Rectangle rec = Screen.PrimaryScreen.WorkingArea;
+            this.Size = new System.Drawing.Size(Convert.ToInt32(.5f * rec.Width), Convert.ToInt32(.5f * rec.Height));
+            this.Location = new System.Drawing.Point(10, 10);
         }
 
         private void Save_Click(object sender, EventArgs e)
@@ -242,6 +251,7 @@ namespace Archive
                     selectedImages = openFileDialog.FileNames;
 
                     // seçilen ilk resmi açar
+                    Picture.SizeMode = PictureBoxSizeMode.Zoom;
                     Picture.Image = Image.FromFile(selectedImages[0]);
                 }
             }

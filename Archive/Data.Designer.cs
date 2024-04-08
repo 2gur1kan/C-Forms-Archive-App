@@ -33,6 +33,10 @@ namespace Archive
             this.Info = new System.Windows.Forms.Label();
             this.Edit = new System.Windows.Forms.Button();
             this.Link = new System.Windows.Forms.LinkLabel();
+            this.Picture = new System.Windows.Forms.PictureBox();
+            this.BackImage = new System.Windows.Forms.Button();
+            this.NextImage = new System.Windows.Forms.Button();
+            ((System.ComponentModel.ISupportInitialize)(this.Picture)).BeginInit();
             this.SuspendLayout();
             // 
             // Title
@@ -55,7 +59,7 @@ namespace Archive
             this.Info.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
             this.Info.Location = new System.Drawing.Point(0, 37);
             this.Info.Name = "Info";
-            this.Info.Size = new System.Drawing.Size(464, 469);
+            this.Info.Size = new System.Drawing.Size(464, 582);
             this.Info.TabIndex = 0;
             this.Info.Text = "Info";
             // 
@@ -86,12 +90,44 @@ namespace Archive
             this.Link.TabIndex = 2;
             this.Link.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.Link_LinkClicked);
             // 
+            // Picture
+            // 
+            this.Picture.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.Picture.Location = new System.Drawing.Point(488, 67);
+            this.Picture.Name = "Picture";
+            this.Picture.Size = new System.Drawing.Size(388, 215);
+            this.Picture.TabIndex = 3;
+            this.Picture.TabStop = false;
+            // 
+            // BackImage
+            // 
+            this.BackImage.Location = new System.Drawing.Point(464, 67);
+            this.BackImage.Name = "BackImage";
+            this.BackImage.Size = new System.Drawing.Size(18, 215);
+            this.BackImage.TabIndex = 4;
+            this.BackImage.Text = "<";
+            this.BackImage.UseVisualStyleBackColor = true;
+            this.BackImage.Click += new System.EventHandler(this.BackImage_Click);
+            // 
+            // NextImage
+            // 
+            this.NextImage.Location = new System.Drawing.Point(882, 67);
+            this.NextImage.Name = "NextImage";
+            this.NextImage.Size = new System.Drawing.Size(18, 215);
+            this.NextImage.TabIndex = 5;
+            this.NextImage.Text = ">";
+            this.NextImage.UseVisualStyleBackColor = true;
+            this.NextImage.Click += new System.EventHandler(this.NextImage_Click);
+            // 
             // Data
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.ClientSize = new System.Drawing.Size(900, 506);
+            this.ClientSize = new System.Drawing.Size(900, 619);
+            this.Controls.Add(this.NextImage);
+            this.Controls.Add(this.BackImage);
+            this.Controls.Add(this.Picture);
             this.Controls.Add(this.Link);
             this.Controls.Add(this.Edit);
             this.Controls.Add(this.Info);
@@ -99,6 +135,7 @@ namespace Archive
             this.Name = "Data";
             this.Text = "Data";
             this.Load += new System.EventHandler(this.Data_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.Picture)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -110,5 +147,8 @@ namespace Archive
         private System.Windows.Forms.Label Info;
         private System.Windows.Forms.Button Edit;
         private System.Windows.Forms.LinkLabel Link;
+        private System.Windows.Forms.PictureBox Picture;
+        private System.Windows.Forms.Button BackImage;
+        private System.Windows.Forms.Button NextImage;
     }
 }
