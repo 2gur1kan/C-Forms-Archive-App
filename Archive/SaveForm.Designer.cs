@@ -36,6 +36,9 @@ namespace Archive
             this.Link = new System.Windows.Forms.TextBox();
             this.Tags = new System.Windows.Forms.ListBox();
             this.SelectedTags = new System.Windows.Forms.ListBox();
+            this.Rate = new System.Windows.Forms.ComboBox();
+            this.rateLabel = new System.Windows.Forms.Label();
+            this.TagsLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.Picture)).BeginInit();
             this.SuspendLayout();
             // 
@@ -77,10 +80,10 @@ namespace Archive
             // Info
             // 
             this.Info.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.Info.Location = new System.Drawing.Point(12, 87);
+            this.Info.Location = new System.Drawing.Point(12, 118);
             this.Info.Multiline = true;
             this.Info.Name = "Info";
-            this.Info.Size = new System.Drawing.Size(514, 374);
+            this.Info.Size = new System.Drawing.Size(514, 343);
             this.Info.TabIndex = 4;
             this.Info.TextChanged += new System.EventHandler(this.Info_TextChanged);
             // 
@@ -96,25 +99,59 @@ namespace Archive
             // 
             // Tags
             // 
+            this.Tags.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(0)))));
             this.Tags.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.Tags.FormattingEnabled = true;
             this.Tags.ItemHeight = 25;
-            this.Tags.Location = new System.Drawing.Point(533, 306);
+            this.Tags.Location = new System.Drawing.Point(533, 331);
             this.Tags.Name = "Tags";
-            this.Tags.Size = new System.Drawing.Size(172, 154);
+            this.Tags.Size = new System.Drawing.Size(172, 129);
             this.Tags.TabIndex = 6;
             this.Tags.SelectedIndexChanged += new System.EventHandler(this.Tags_SelectedIndexChanged);
             // 
             // SelectedTags
             // 
+            this.SelectedTags.BackColor = System.Drawing.Color.Yellow;
             this.SelectedTags.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.SelectedTags.FormattingEnabled = true;
             this.SelectedTags.ItemHeight = 25;
-            this.SelectedTags.Location = new System.Drawing.Point(711, 307);
+            this.SelectedTags.Location = new System.Drawing.Point(711, 332);
             this.SelectedTags.Name = "SelectedTags";
-            this.SelectedTags.Size = new System.Drawing.Size(165, 154);
+            this.SelectedTags.Size = new System.Drawing.Size(165, 129);
             this.SelectedTags.TabIndex = 7;
             this.SelectedTags.SelectedIndexChanged += new System.EventHandler(this.SelectedTags_SelectedIndexChanged);
+            // 
+            // Rate
+            // 
+            this.Rate.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.Rate.FormattingEnabled = true;
+            this.Rate.Location = new System.Drawing.Point(462, 84);
+            this.Rate.Name = "Rate";
+            this.Rate.Size = new System.Drawing.Size(63, 33);
+            this.Rate.TabIndex = 8;
+            // 
+            // rateLabel
+            // 
+            this.rateLabel.AutoSize = true;
+            this.rateLabel.BackColor = System.Drawing.SystemColors.AppWorkspace;
+            this.rateLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.rateLabel.Location = new System.Drawing.Point(387, 87);
+            this.rateLabel.Name = "rateLabel";
+            this.rateLabel.Size = new System.Drawing.Size(69, 25);
+            this.rateLabel.TabIndex = 9;
+            this.rateLabel.Text = "Rate :";
+            // 
+            // TagsLabel
+            // 
+            this.TagsLabel.AutoSize = true;
+            this.TagsLabel.BackColor = System.Drawing.SystemColors.AppWorkspace;
+            this.TagsLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.TagsLabel.Location = new System.Drawing.Point(634, 302);
+            this.TagsLabel.Name = "TagsLabel";
+            this.TagsLabel.Size = new System.Drawing.Size(150, 25);
+            this.TagsLabel.TabIndex = 10;
+            this.TagsLabel.Text = ": Select Tags :";
+            this.TagsLabel.Click += new System.EventHandler(this.TagsLabel_Click);
             // 
             // SaveForm
             // 
@@ -122,6 +159,9 @@ namespace Archive
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.ClientSize = new System.Drawing.Size(888, 512);
+            this.Controls.Add(this.TagsLabel);
+            this.Controls.Add(this.rateLabel);
+            this.Controls.Add(this.Rate);
             this.Controls.Add(this.SelectedTags);
             this.Controls.Add(this.Tags);
             this.Controls.Add(this.Link);
@@ -148,6 +188,9 @@ namespace Archive
         private System.Windows.Forms.TextBox Link;
         private System.Windows.Forms.ListBox Tags;
         private System.Windows.Forms.ListBox SelectedTags;
+        private System.Windows.Forms.ComboBox Rate;
+        private System.Windows.Forms.Label rateLabel;
+        private System.Windows.Forms.Label TagsLabel;
     }
 }
 

@@ -32,6 +32,9 @@ namespace Archive
 
         private void ArchiveMain_Load(object sender, EventArgs e)
         {
+            // Yeni formun başlangıç konumunu manuel olarak ayarlayın
+            this.StartPosition = FormStartPosition.CenterScreen;
+
             Sizer();
             AreRegistrationPlacesActive();
 
@@ -169,6 +172,11 @@ namespace Archive
         {
             SaveForm New = new SaveForm();
             New.tags = this.Tags;
+
+            // Yeni formun başlangıç konumunu manuel olarak ayarlayın
+            New.StartPosition = FormStartPosition.Manual;
+            New.Location = this.Location;
+
             New.Show();
         }
 
@@ -223,6 +231,10 @@ namespace Archive
                             result.PartialTitle = this.PartialTitle;
                             result.path = Path.Combine(Environment.CurrentDirectory, archivePath + dataPath);
 
+                            // Yeni formun başlangıç konumunu manuel olarak ayarlayın
+                            result.StartPosition = FormStartPosition.Manual;
+                            result.Location = this.Location;
+
                             result.Show();
                         }
                     }
@@ -248,7 +260,25 @@ namespace Archive
             Dataform.titleText = Shelf1.Text;
             Dataform.path = Path.Combine(Environment.CurrentDirectory, archivePath + dataPath + Shelf1.Text);
 
+            // Yeni formun başlangıç konumunu manuel olarak ayarlayın
+            Dataform.StartPosition = FormStartPosition.Manual;
+            Dataform.Location = this.Location;
+
             Dataform.Show();
+        }
+
+        private void DetailedSearch_Click(object sender, EventArgs e)
+        {
+            DetailedSearchForm DSF = new DetailedSearchForm();
+
+            DSF.tags = this.Tags;
+
+            DSF.Show();
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

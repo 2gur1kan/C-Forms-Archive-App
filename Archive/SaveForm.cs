@@ -54,7 +54,15 @@ namespace Archive
             {
                 Tags.Items.Add(tag);
             }
-        }
+
+            //set rate
+            string[] ranges = new string[] { "0", "1", "2", "3", "4", "5" };
+            Rate.Items.AddRange(ranges);
+            Rate.DropDownStyle = ComboBoxStyle.DropDownList;
+            Rate.Text = "0";
+
+
+        } 
 
         private void Sizer()
         {
@@ -97,6 +105,9 @@ namespace Archive
                                         // StreamWriter nesnesi oluştur ve dosyayı aç
                                         using (StreamWriter sw = new StreamWriter(DataPath + "\\Data.txt", true))
                                         {
+                                            // rate i kaydet
+                                            sw.WriteLine(Rate.Text);
+
                                             // Başlığı dosyaya yaz
                                             sw.WriteLine(Title.Text);
 
@@ -110,7 +121,6 @@ namespace Archive
                                                 // link yazılmamışsa boşluk yaz
                                                 sw.WriteLine("                                                                    ");
                                             }
-
                                         }
                                     }
 
@@ -331,6 +341,11 @@ namespace Archive
             {
                 SelectedTags.Items.Add(tag);
             }
+        }
+
+        private void TagsLabel_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

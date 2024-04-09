@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,6 +34,7 @@ namespace Archive
                 button.Text = item; // Butonun metnini liste elemanına ayarlayın
 
                 button.Dock = DockStyle.Top;
+                button.Height = 100;
                 button.AutoSize = true; // Otomatik boyutlandırmayı etkinleştirin
                 button.TextAlign = ContentAlignment.MiddleLeft; // Metni sağa hizalayın
 
@@ -40,6 +42,20 @@ namespace Archive
                 button.FlatStyle = FlatStyle.Flat;
                 button.FlatAppearance.BorderColor = Color.White; // Çerçeve rengini beyaz olarak ayarlayın
                 button.BackColor = Color.White;
+
+                //butona varsa resim ekle
+                string imagePath = Path.Combine(path, item, "Images", "0.jpg");
+                if (File.Exists(imagePath))
+                {
+                    // Resmi yükleyin
+                    Image originalImage = Image.FromFile(imagePath);
+                    // Resmi buton boyutuna ölçekleyin
+                    Image scaledImage = originalImage.GetThumbnailImage(button.Width * 2, button.Height, null, IntPtr.Zero);
+                    // Ölçeklenmiş resmi butona atayın
+                    button.Image = scaledImage;
+                    // Resmin butona sağ üst köşesine hizalayın
+                    button.ImageAlign = ContentAlignment.MiddleRight;
+                }
 
                 // Butonun tıklama olayına dinamik olarak bir işlev ekleyin
                 button.Click += Button_Click;
@@ -58,6 +74,10 @@ namespace Archive
 
             Dataform.titleText = buttonText;
             Dataform.path = path + buttonText;
+
+            // Yeni formun başlangıç konumunu manuel olarak ayarlayın
+            Dataform.StartPosition = FormStartPosition.Manual;
+            Dataform.Location = this.Location;
 
             Dataform.Show();
 

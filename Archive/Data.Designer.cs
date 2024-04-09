@@ -133,6 +133,7 @@ namespace Archive
             this.Controls.Add(this.Info);
             this.Controls.Add(this.Title);
             this.Name = "Data";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.WindowsDefaultBounds;
             this.Text = "Data";
             this.Load += new System.EventHandler(this.Data_Load);
             ((System.ComponentModel.ISupportInitialize)(this.Picture)).EndInit();

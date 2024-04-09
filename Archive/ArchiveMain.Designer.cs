@@ -70,6 +70,7 @@ namespace Archive
             this.DetailedSearch.TabIndex = 2;
             this.DetailedSearch.Text = "DetailedSearch";
             this.DetailedSearch.UseVisualStyleBackColor = true;
+            this.DetailedSearch.Click += new System.EventHandler(this.DetailedSearch_Click);
             // 
             // New
             // 
@@ -92,6 +93,7 @@ namespace Archive
             this.label1.Size = new System.Drawing.Size(60, 13);
             this.label1.TabIndex = 4;
             this.label1.Text = "Search Bar";
+            this.label1.Click += new System.EventHandler(this.label1_Click);
             // 
             // Shelf1
             // 
@@ -154,6 +156,7 @@ namespace Archive
             this.Controls.Add(this.Search);
             this.Controls.Add(this.SearchBar);
             this.Name = "ArchiveMain";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "ArchiveMain";
             this.Load += new System.EventHandler(this.ArchiveMain_Load);
             this.ResumeLayout(false);

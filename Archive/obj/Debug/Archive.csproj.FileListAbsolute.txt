@@ -21,3 +21,4 @@ C:\Users\2gur1\Desktop\uygulama kayıt dosyaları\Github\Archive\C-Forms-Archive
 C:\Users\2gur1\Desktop\uygulama kayıt dosyaları\Github\Archive\C-Forms-Archive-App\Archive\obj\Debug\Archive.pdb
 C:\Users\2gur1\Desktop\uygulama kayıt dosyaları\Github\Archive\C-Forms-Archive-App\Archive\obj\Debug\Archive.Data.resources
 C:\Users\2gur1\Desktop\uygulama kayıt dosyaları\Github\Archive\C-Forms-Archive-App\Archive\obj\Debug\Archive.SearchResultForm.resources
+C:\Users\2gur1\Desktop\uygulama kayıt dosyaları\Github\Archive\C-Forms-Archive-App\Archive\obj\Debug\Archive.DetailedSearchForm.resources
