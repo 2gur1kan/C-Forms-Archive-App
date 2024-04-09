@@ -55,6 +55,8 @@ namespace Archive
         {
             searchTitleList = new List<string>();
 
+            List<string> removeList = new List<string>();
+
             string SearchTitle = SearchBar.Text;
 
             if (File.Exists(titlePath))
@@ -108,7 +110,7 @@ namespace Archive
                 }
 
                 // rate verilmiş ise onları listede eler
-                if(Rate.Text != "0" && searchTitleList.Count > 0) ///////////////// eleman silindiği zaman liste count sayısı değişiyor sistme hata veriyor
+                if(Rate.Text != "0" && searchTitleList.Count > 0)
                 {
                     int rate = int.Parse(Rate.Text);
 
@@ -122,13 +124,13 @@ namespace Archive
                             // ilk satır rate i veriyor
                             using (StreamReader sr = new StreamReader(path))
                             {
-                                string firstLine = sr.ReadLine();
+                                string rateLine = sr.ReadLine();
 
-                                if (!string.IsNullOrEmpty(firstLine))
+                                if (!string.IsNullOrEmpty(rateLine))
                                 {
-                                    if (rate > int.Parse(firstLine))
+                                    if (rate > int.Parse(rateLine))
                                     {
-                                        searchTitleList.Remove(title);
+                                        removeList.Add(rateLine);
                                     }
                                 }
                                 else
@@ -139,6 +141,8 @@ namespace Archive
                         }
                     }
                 }
+
+                removeList = removeInList(removeList);
 
                 // taglere göre ele
                 if(selectedTags.Count > 0 && searchTitleList.Count > 0)
@@ -181,7 +185,7 @@ namespace Archive
 
                                 if (!haveTag)
                                 {
-                                    searchTitleList.Remove(title);
+                                    removeList.Add(title);
                                     break;
                                 }
                             }
@@ -189,50 +193,71 @@ namespace Archive
                     }
                 }
 
-                // Liste elemanları üzerinde döngü yapın
-                foreach (string item in searchTitleList)
+                removeList = removeInList(removeList);
+
+                if(searchTitleList.Count > 0)
                 {
-                    // Her bir liste elemanı için bir buton oluşturun
-                    Button button = new Button();
-                    button.Text = item; // Butonun metnini liste elemanına ayarlayın
-
-                    button.Dock = DockStyle.Top;
-                    button.Height = 100;
-                    button.AutoSize = true; // Otomatik boyutlandırmayı etkinleştirin
-                    button.TextAlign = ContentAlignment.MiddleLeft; // Metni sağa hizalayın
-
-                    // Butonun stilini ve çerçeve rengini ayarlayın
-                    button.FlatStyle = FlatStyle.Flat;
-                    button.FlatAppearance.BorderColor = Color.White; // Çerçeve rengini beyaz olarak ayarlayın
-                    button.BackColor = Color.White;
-
-                    //butona varsa resim ekle
-                    string imagePath = Path.Combine(DataPath, item, "Images", "0.jpg");
-                    if (File.Exists(imagePath))
+                    // Liste elemanları üzerinde döngü yapın
+                    foreach (string item in searchTitleList)
                     {
-                        // Resmi yükleyin
-                        Image originalImage = Image.FromFile(imagePath);
-                        // Resmi buton boyutuna ölçekleyin
-                        Image scaledImage = originalImage.GetThumbnailImage(button.Width * 2, button.Height, null, IntPtr.Zero);
-                        // Ölçeklenmiş resmi butona atayın
-                        button.Image = scaledImage;
-                        // Resmin butona sağ üst köşesine hizalayın
-                        button.ImageAlign = ContentAlignment.MiddleRight;
+                        // Her bir liste elemanı için bir buton oluşturun
+                        Button button = new Button();
+                        button.Text = item; // Butonun metnini liste elemanına ayarlayın
+
+                        button.Dock = DockStyle.Top;
+                        button.Height = 100;
+                        button.AutoSize = true; // Otomatik boyutlandırmayı etkinleştirin
+                        button.TextAlign = ContentAlignment.MiddleLeft; // Metni sağa hizalayın
+
+                        // Butonun stilini ve çerçeve rengini ayarlayın
+                        button.FlatStyle = FlatStyle.Flat;
+                        button.FlatAppearance.BorderColor = Color.White; // Çerçeve rengini beyaz olarak ayarlayın
+                        button.BackColor = Color.White;
+
+                        //butona varsa resim ekle
+                        string imagePath = Path.Combine(DataPath, item, "Images", "0.jpg");
+                        if (File.Exists(imagePath))
+                        {
+                            // Resmi yükleyin
+                            Image originalImage = Image.FromFile(imagePath);
+                            // Resmi buton boyutuna ölçekleyin
+                            Image scaledImage = originalImage.GetThumbnailImage(button.Width * 2, button.Height, null, IntPtr.Zero);
+                            // Ölçeklenmiş resmi butona atayın
+                            button.Image = scaledImage;
+                            // Resmin butona sağ üst köşesine hizalayın
+                            button.ImageAlign = ContentAlignment.MiddleRight;
+                        }
+
+                        // Butonun tıklama olayına dinamik olarak bir işlev ekleyin
+                        button.Click += Button_Click;
+
+                        // Butonu panele ekleyin
+                        Panel.Controls.Add(button);
                     }
-
-                    // Butonun tıklama olayına dinamik olarak bir işlev ekleyin
-                    button.Click += Button_Click;
-
-                    // Butonu panele ekleyin
-                    Panel.Controls.Add(button);
                 }
-
+                else
+                {
+                    MessageBox.Show("Istenilen kriterlede eleman bulunamadı ", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
             else
             {
                 // Dosya mevcut değil ise
                 MessageBox.Show("Belirtilen dosya bulunamadı: " + titlePath);
             }       
+        }
+
+        /// <summary>
+        /// listenin içerisineden silinmesini istenilen elemanları siler
+        /// </summary>
+        private List<string> removeInList(List<string> removeList)
+        {
+            foreach (string title in removeList)
+            {
+                searchTitleList.Remove(title);
+            }
+
+            return new List<string>();
         }
 
         private void Tags_SelectedIndexChanged(object sender, EventArgs e)
