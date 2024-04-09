@@ -108,7 +108,7 @@ namespace Archive
                 }
 
                 // rate verilmiş ise onları listede eler
-                if(Rate.Text != "0")
+                if(Rate.Text != "0" && searchTitleList.Count > 0) ///////////////// eleman silindiği zaman liste count sayısı değişiyor sistme hata veriyor
                 {
                     int rate = int.Parse(Rate.Text);
 
@@ -126,7 +126,7 @@ namespace Archive
 
                                 if (!string.IsNullOrEmpty(firstLine))
                                 {
-                                    if (rate < int.Parse(firstLine))
+                                    if (rate > int.Parse(firstLine))
                                     {
                                         searchTitleList.Remove(title);
                                     }
@@ -141,7 +141,7 @@ namespace Archive
                 }
 
                 // taglere göre ele
-                if(selectedTags.Count > 0)
+                if(selectedTags.Count > 0 && searchTitleList.Count > 0)
                 {
                     foreach (string title in searchTitleList)
                     {
@@ -187,6 +187,44 @@ namespace Archive
                             }
                         }
                     }
+                }
+
+                // Liste elemanları üzerinde döngü yapın
+                foreach (string item in searchTitleList)
+                {
+                    // Her bir liste elemanı için bir buton oluşturun
+                    Button button = new Button();
+                    button.Text = item; // Butonun metnini liste elemanına ayarlayın
+
+                    button.Dock = DockStyle.Top;
+                    button.Height = 100;
+                    button.AutoSize = true; // Otomatik boyutlandırmayı etkinleştirin
+                    button.TextAlign = ContentAlignment.MiddleLeft; // Metni sağa hizalayın
+
+                    // Butonun stilini ve çerçeve rengini ayarlayın
+                    button.FlatStyle = FlatStyle.Flat;
+                    button.FlatAppearance.BorderColor = Color.White; // Çerçeve rengini beyaz olarak ayarlayın
+                    button.BackColor = Color.White;
+
+                    //butona varsa resim ekle
+                    string imagePath = Path.Combine(DataPath, item, "Images", "0.jpg");
+                    if (File.Exists(imagePath))
+                    {
+                        // Resmi yükleyin
+                        Image originalImage = Image.FromFile(imagePath);
+                        // Resmi buton boyutuna ölçekleyin
+                        Image scaledImage = originalImage.GetThumbnailImage(button.Width * 2, button.Height, null, IntPtr.Zero);
+                        // Ölçeklenmiş resmi butona atayın
+                        button.Image = scaledImage;
+                        // Resmin butona sağ üst köşesine hizalayın
+                        button.ImageAlign = ContentAlignment.MiddleRight;
+                    }
+
+                    // Butonun tıklama olayına dinamik olarak bir işlev ekleyin
+                    button.Click += Button_Click;
+
+                    // Butonu panele ekleyin
+                    Panel.Controls.Add(button);
                 }
 
             }
@@ -244,6 +282,22 @@ namespace Archive
             }
         }
 
+        private void Button_Click(object sender, EventArgs e)
+        {
+            Button clickedButton = (Button)sender; // Buton nesnesine dönüştürün
+            string buttonText = clickedButton.Text; // Butonun metnini alın
 
+            Data Dataform = new Data();
+
+            Dataform.titleText = buttonText;
+            Dataform.path = dataPath + buttonText;
+
+            // Yeni formun başlangıç konumunu manuel olarak ayarlayın
+            Dataform.StartPosition = FormStartPosition.Manual;
+            Dataform.Location = this.Location;
+
+            Dataform.Show();
+
+        }
     }
 }
