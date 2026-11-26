@@ -30,7 +30,7 @@ namespace Archive
         private void InitializeComponent()
         {
             this.Title = new System.Windows.Forms.Label();
-            this.Info = new System.Windows.Forms.Label();
+            this.Info = new System.Windows.Forms.TextBox();
             this.Edit = new System.Windows.Forms.Button();
             this.Link = new System.Windows.Forms.LinkLabel();
             this.Picture = new System.Windows.Forms.PictureBox();
@@ -54,6 +54,10 @@ namespace Archive
             // Info
             // 
             this.Info.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.Info.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.Info.Multiline = true;
+            this.Info.ReadOnly = true;
+            this.Info.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.Info.Dock = System.Windows.Forms.DockStyle.Left;
             this.Info.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.Info.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
@@ -145,7 +149,7 @@ namespace Archive
         #endregion
 
         private System.Windows.Forms.Label Title;
-        private System.Windows.Forms.Label Info;
+        private System.Windows.Forms.TextBox Info;
         private System.Windows.Forms.Button Edit;
         private System.Windows.Forms.LinkLabel Link;
         private System.Windows.Forms.PictureBox Picture;

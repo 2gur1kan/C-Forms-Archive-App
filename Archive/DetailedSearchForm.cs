@@ -18,311 +18,162 @@ namespace Archive
             InitializeComponent();
         }
 
-        string archivePath = ArchiveMain.archivePath;
-        string dataPath = ArchiveMain.dataPath;
-        string titleDataBaseName = ArchiveMain.titleDataBaseName;
-        string tagDataBaseName = ArchiveMain.tagsDataBaseName;
-
-        string titlePath;
-        string tagPath;
-        string DataPath;
-
         public List<string> tags = new List<string>();
+        public SortMode startSort = SortMode.Newest; // ana ekranın seçimi varsayılan gelir
+        public bool startDeepFlag = false;
+
+        // yerleşim ayarları
+        private int filterW = 330; // sol filtre sütununun genişliği
+        private int searchH = 46;
+
         List<string> selectedTags = new List<string>();
 
-        List<string> searchTitleList = new List<string>();
+        ComboBox sortBox;
+        CheckBox deepBox;
+        Label sortLabel;
 
         private void DetailedSearchForm_Load(object sender, EventArgs e)
         {
-            DataPath = Path.Combine(Environment.CurrentDirectory, archivePath + dataPath);
-            titlePath = Path.Combine(Environment.CurrentDirectory, archivePath + titleDataBaseName);
-            tagPath = Path.Combine(Environment.CurrentDirectory, archivePath + tagDataBaseName);
+            ArchiveMain.FillRate(Rate);
+            BuildExtraUI();
 
-            //set rate
-            string[] ranges = new string[] { "0", "1", "2", "3", "4", "5" };
-            Rate.Items.AddRange(ranges);
-            Rate.DropDownStyle = ComboBoxStyle.DropDownList;
-            Rate.Text = "0";
+            ArchiveMain.ApplyTheme(this);
+            StyleDetailed();
+            LayoutDetailed();
+            SizeChanged += (s, ev) => LayoutDetailed(); // pencere boyutu değişince yerleşim yenilenir
 
-            // tagleri ekler
-            foreach (string tag in tags)
-            {
-                Tags.Items.Add(tag);
-            }
-        }
-
-        private void SearchButton_Click(object sender, EventArgs e)
-        {
-            searchTitleList = new List<string>();
-
-            List<string> removeList = new List<string>();
-
-            string SearchTitle = SearchBar.Text;
-
-            if (File.Exists(titlePath))
-            {
-                //aranacaklar listesini oluşturur
-                if (!string.IsNullOrEmpty(SearchTitle))
-                {
-                    searchTitleList = new List<string>();
-
-                    // Dosya mevcut ise, dosyadaki tüm satırları okuyun
-                    string[] lines = File.ReadAllLines(titlePath);
-
-                    // Aranan başlığın tam eşleşmesini arayın
-                    bool isThere = lines.Any(line => line.Equals(SearchTitle));
-
-                    if (isThere)
-                    {
-                        searchTitleList.Add(SearchTitle);
-                    }
-
-                    {
-                        // Arama metninden gereksiz boşlukları kaldırın
-                        string trimmedSearchTitle = SearchTitle.Trim();
-
-                        // Gereksiz boşlukları kaldırılmış arama metnini büyük-küçük harfe duyarlı olmayan bir şekilde arayın
-                        List<string> partial = lines.Where(line => line.IndexOf(trimmedSearchTitle, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
-
-                        if (partial.Any())
-                        {
-                            foreach (var part in partial)
-                            {
-                                if (part != SearchTitle) searchTitleList.Add(part);
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    // titlePath'deki dosyayı satır satır okuyun
-                    string[] lines = File.ReadAllLines(titlePath);
-
-                    // searchTitleList listesine her satırı ekle
-                    foreach (string line in lines)
-                    {
-                        // Satırın boş olmadığından ve zaten listeye eklenmediğinden emin olun
-                        if (!string.IsNullOrWhiteSpace(line))
-                        {
-                            searchTitleList.Add(line);
-                        }
-                    }
-                }
-
-                // rate verilmiş ise onları listede eler
-                if(Rate.Text != "0" && searchTitleList.Count > 0)
-                {
-                    int rate = int.Parse(Rate.Text);
-
-                    foreach (string title in searchTitleList)
-                    {
-                        string path = Path.Combine(DataPath, title, "Data.txt");
-
-                        if (File.Exists(path))
-                        { 
-                            // Dosyayı açın ve ilk satırı okuyun
-                            // ilk satır rate i veriyor
-                            using (StreamReader sr = new StreamReader(path))
-                            {
-                                string rateLine = sr.ReadLine();
-
-                                if (!string.IsNullOrEmpty(rateLine))
-                                {
-                                    if (rate > int.Parse(rateLine))
-                                    {
-                                        removeList.Add(rateLine);
-                                    }
-                                }
-                                else
-                                {
-                                    Console.WriteLine("Dosya boş.");
-                                }
-                            }
-                        }
-                    }
-                }
-
-                removeList = removeInList(removeList);
-
-                // taglere göre ele
-                if(selectedTags.Count > 0 && searchTitleList.Count > 0)
-                {
-                    foreach (string title in searchTitleList)
-                    {
-                        string path = Path.Combine(DataPath, title, "Tags.txt");
-                        List<string> tags = new List<string>();
-
-                        if (File.Exists(path))
-                        {
-                            // Dosyayı açın ve ilk satırı okuyun
-                            // ilk satır rate i veriyor
-                            using (StreamReader sr = new StreamReader(path))
-                            {
-                                string line;
-                                while ((line = sr.ReadLine()) != null)
-                                {
-                                    // Her bir satırı "tags" listesine ekleyin
-                                    tags.Add(line);
-                                }
-                            }
-                        }
-
-                        if(tags.Count > 0)
-                        {
-                            // burada tags ler eğer selectedTags değişkenindeki elemanları içermiyorsa o elemanı searchTitleList içerisinden silsin
-                            foreach (string selectedTag in selectedTags)
-                            {
-                                bool haveTag = false;
-
-                                foreach (string tag in tags)
-                                {
-                                    if (tag == selectedTag)
-                                    {
-                                        haveTag = true;
-                                        break; // Eşleşme bulunduğunda iç içe döngüyü sonlandır
-                                    }
-                                }
-
-                                if (!haveTag)
-                                {
-                                    removeList.Add(title);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                removeList = removeInList(removeList);
-
-                if(searchTitleList.Count > 0)
-                {
-                    // Liste elemanları üzerinde döngü yapın
-                    foreach (string item in searchTitleList)
-                    {
-                        // Her bir liste elemanı için bir buton oluşturun
-                        Button button = new Button();
-                        button.Text = item; // Butonun metnini liste elemanına ayarlayın
-
-                        button.Dock = DockStyle.Top;
-                        button.Height = 100;
-                        button.AutoSize = true; // Otomatik boyutlandırmayı etkinleştirin
-                        button.TextAlign = ContentAlignment.MiddleLeft; // Metni sağa hizalayın
-
-                        // Butonun stilini ve çerçeve rengini ayarlayın
-                        button.FlatStyle = FlatStyle.Flat;
-                        button.FlatAppearance.BorderColor = Color.White; // Çerçeve rengini beyaz olarak ayarlayın
-                        button.BackColor = Color.White;
-
-                        //butona varsa resim ekle
-                        string imagePath = Path.Combine(DataPath, item, "Images", "0.jpg");
-                        if (File.Exists(imagePath))
-                        {
-                            // Resmi yükleyin
-                            Image originalImage = Image.FromFile(imagePath);
-                            // Resmi buton boyutuna ölçekleyin
-                            Image scaledImage = originalImage.GetThumbnailImage(button.Width * 2, button.Height, null, IntPtr.Zero);
-                            // Ölçeklenmiş resmi butona atayın
-                            button.Image = scaledImage;
-                            // Resmin butona sağ üst köşesine hizalayın
-                            button.ImageAlign = ContentAlignment.MiddleRight;
-                        }
-
-                        // Butonun tıklama olayına dinamik olarak bir işlev ekleyin
-                        button.Click += Button_Click;
-
-                        // Butonu panele ekleyin
-                        Panel.Controls.Add(button);
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("Istenilen kriterlede eleman bulunamadı ", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-            else
-            {
-                // Dosya mevcut değil ise
-                MessageBox.Show("Belirtilen dosya bulunamadı: " + titlePath);
-            }       
+            UpdateListBoxes(); // tagleri ekler
         }
 
         /// <summary>
-        /// listenin içerisineden silinmesini istenilen elemanları siler
+        /// designer'da olmayan sıralama ve açıklamada arama seçeneklerini ekler, konumları LayoutDetailed verir
         /// </summary>
-        private List<string> removeInList(List<string> removeList)
+        private void BuildExtraUI()
         {
-            foreach (string title in removeList)
-            {
-                searchTitleList.Remove(title);
-            }
+            sortLabel = ArchiveMain.MakeLabel("Sırala", 0, 0);
+            Controls.Add(sortLabel);
 
-            return new List<string>();
+            sortBox = new ComboBox();
+            ArchiveMain.FillSort(sortBox);
+            sortBox.SelectedIndex = (int)startSort;
+            Controls.Add(sortBox);
+
+            deepBox = new CheckBox();
+            deepBox.Text = "Açıklama ve linkte de ara";
+            deepBox.Checked = startDeepFlag;
+            Controls.Add(deepBox);
         }
 
-        private void Tags_SelectedIndexChanged(object sender, EventArgs e)
+        private void StyleDetailed()
         {
-            // Seçilen öğeyi işle
-            int index = Tags.SelectedIndex;
+            SearchBar.Font = ArchiveMain.F(14f);
+            rateLabel.Text = "En düşük puan";
+            TagsLabel.Text = "Taglar  (tıkla: ekle / çıkar)";
+            rateLabel.AutoSize = true;
+            TagsLabel.AutoSize = true;
 
-            if (index > -1)
-            {
-                selectedTags.Add(tags[index]);
-                tags.RemoveAt(index);
-            }
-
-            UpdateListBoxes();
+            SearchButton.Font = ArchiveMain.F(12f, FontStyle.Bold);
+            Panel.AutoScroll = true; // sonuç sığmazsa kaydırılabilsin
+            Panel.Padding = new Padding(0, 0, ArchiveMain.gap, 0);
         }
 
-        private void SelectedTags_SelectedIndexChanged_1(object sender, EventArgs e)
+        /// <summary>
+        /// solda filtre sütunu (arama, puan, sıralama, taglar, arama butonu), sağda sonuç kartları
+        /// </summary>
+        private void LayoutDetailed()
         {
-            // Seçilen öğeyi işle
-            int index = SelectedTags.SelectedIndex;
+            if (sortBox == null) return; // yükleme bitmeden çalışmasın
 
-            if (index > -1)
+            int w = ClientSize.Width;
+            int h = ClientSize.Height;
+            int pad = ArchiveMain.pad;
+            int gap = ArchiveMain.gap;
+            int cw = filterW - pad; // sütun içi genişlik
+
+            SearchBar.SetBounds(pad, pad, cw, SearchBar.Height);
+
+            rateLabel.Location = new Point(pad, SearchBar.Bottom + gap + 4);
+            Rate.SetBounds(rateLabel.Right + gap, SearchBar.Bottom + gap, 70, Rate.Height);
+
+            sortLabel.Location = new Point(pad, Rate.Bottom + gap + 4);
+            sortBox.SetBounds(pad, sortLabel.Bottom + 4, cw, sortBox.Height);
+
+            deepBox.Location = new Point(pad, sortBox.Bottom + gap);
+
+            TagsLabel.Location = new Point(pad, deepBox.Bottom + gap);
+
+            SearchButton.SetBounds(pad, h - pad - searchH, cw, searchH);
+
+            int listTop = TagsLabel.Bottom + 4;
+            int half = (cw - gap) / 2;
+            Tags.SetBounds(pad, listTop, half, Math.Max(40, SearchButton.Top - gap - listTop));
+            SelectedTags.SetBounds(pad + half + gap, listTop, half, Tags.Height);
+
+            Panel.Dock = DockStyle.None;
+            Panel.SetBounds(filterW + pad, pad, Math.Max(100, w - filterW - 2 * pad), Math.Max(100, h - 2 * pad));
+        }
+
+        ////////////////////// arama
+        /// <summary>
+        /// başlık metnine, en düşük puana ve seçilen taglerin hepsine göre süzüp seçili sırayla buton olarak listeler
+        /// arama kutusu boşsa tüm kayıtlardan başlar
+        /// </summary>
+        private void SearchButton_Click(object sender, EventArgs e)
+        {
+            int minRate;
+            int.TryParse(Rate.Text, out minRate);
+
+            List<Record> found;
+
+            try
             {
-                tags.Add(selectedTags[index]);
-                selectedTags.RemoveAt(index);
+                found = ArchiveDB.Instance.Search(SearchBar.Text, deepBox.Checked, minRate, selectedTags, ArchiveMain.ToSort(sortBox));
             }
+            catch (Exception ex)
+            {
+                ArchiveMain.ShowError("Hata: " + ex.Message);
+                return;
+            }
+
+            ArchiveMain.ClearButtons(Panel); // önceki aramanın butonları kalmasın
+
+            if (found.Count == 0)
+            {
+                ArchiveMain.ShowError("Istenilen kriterlede eleman bulunamadı ");
+                return;
+            }
+
+            // Dock.Top kartlar sondan başa dizilir, o yüzden ters sırayla eklenir ki liste seçilen sıralamayla aynı görünsün
+            foreach (Record r in Enumerable.Reverse(found)) Panel.Controls.Add(ArchiveMain.CreateTitleButton(r, Button_Click));
+        }
+
+        private void Button_Click(object sender, EventArgs e) => ArchiveMain.OpenData((string)((Button)sender).Tag, this);
+
+        ////////////////////// taglar
+        private void Tags_SelectedIndexChanged(object sender, EventArgs e) => MoveTag(tags, selectedTags, Tags.SelectedIndex);
+
+        private void SelectedTags_SelectedIndexChanged_1(object sender, EventArgs e) => MoveTag(selectedTags, tags, SelectedTags.SelectedIndex);
+
+        /// <summary>
+        /// seçilen tagi bir listeden diğerine taşır, seçim yoksa (index -1) bir şey yapmaz
+        /// </summary>
+        private void MoveTag(List<string> from, List<string> to, int index)
+        {
+            if (index < 0) return;
+
+            to.Add(from[index]);
+            from.RemoveAt(index);
 
             UpdateListBoxes();
         }
 
         private void UpdateListBoxes()
         {
-            // Listbox'ları temizle
             Tags.Items.Clear();
             SelectedTags.Items.Clear();
 
-            // tags listesindeki öğeleri Tags listbox'ına ekleyin
-            foreach (string tag in tags)
-            {
-                Tags.Items.Add(tag);
-            }
-
-            // selectedTags listesindeki öğeleri SelectedTags listbox'ına ekleyin
-            foreach (string tag in selectedTags)
-            {
-                SelectedTags.Items.Add(tag);
-            }
-        }
-
-        private void Button_Click(object sender, EventArgs e)
-        {
-            Button clickedButton = (Button)sender; // Buton nesnesine dönüştürün
-            string buttonText = clickedButton.Text; // Butonun metnini alın
-
-            Data Dataform = new Data();
-
-            Dataform.titleText = buttonText;
-            Dataform.path = dataPath + buttonText;
-
-            // Yeni formun başlangıç konumunu manuel olarak ayarlayın
-            Dataform.StartPosition = FormStartPosition.Manual;
-            Dataform.Location = this.Location;
-
-            Dataform.Show();
-
+            foreach (string tag in tags) Tags.Items.Add(tag);
+            foreach (string tag in selectedTags) SelectedTags.Items.Add(tag);
         }
     }
 }

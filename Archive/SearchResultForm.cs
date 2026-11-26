@@ -18,71 +18,22 @@ namespace Archive
             InitializeComponent();
         }
 
-        public List<string> PartialTitle = new List<string>();
-        public string path;
+        public List<Record> Results = new List<Record>(); // ArchiveMain doldurur, sıralama arama sırasında yapılmıştır
 
         private void SearchResultForm_Load(object sender, EventArgs e)
         {
-            // Panelin formun tüm alanını kapladığını belirtin
-            Panel.Dock = DockStyle.Fill;
+            ArchiveMain.ApplyTheme(this);
 
-            // Liste elemanları üzerinde döngü yapın
-            foreach (string item in PartialTitle)
-            {
-                // Her bir liste elemanı için bir buton oluşturun
-                Button button = new Button();
-                button.Text = item; // Butonun metnini liste elemanına ayarlayın
+            Text = "Sonuçlar (" + Results.Count + ")";
+            Panel.Dock = DockStyle.Fill; // panel formun tüm alanını kaplar
+            Panel.Padding = new Padding(ArchiveMain.pad);
+            Panel.AutoScroll = true; // sonuç sığmazsa kaydırılabilsin
 
-                button.Dock = DockStyle.Top;
-                button.Height = 100;
-                button.AutoSize = true; // Otomatik boyutlandırmayı etkinleştirin
-                button.TextAlign = ContentAlignment.MiddleLeft; // Metni sağa hizalayın
-
-                // Butonun stilini ve çerçeve rengini ayarlayın
-                button.FlatStyle = FlatStyle.Flat;
-                button.FlatAppearance.BorderColor = Color.White; // Çerçeve rengini beyaz olarak ayarlayın
-                button.BackColor = Color.White;
-
-                //butona varsa resim ekle
-                string imagePath = Path.Combine(path, item, "Images", "0.jpg");
-                if (File.Exists(imagePath))
-                {
-                    // Resmi yükleyin
-                    Image originalImage = Image.FromFile(imagePath);
-                    // Resmi buton boyutuna ölçekleyin
-                    Image scaledImage = originalImage.GetThumbnailImage(button.Width * 2, button.Height, null, IntPtr.Zero);
-                    // Ölçeklenmiş resmi butona atayın
-                    button.Image = scaledImage;
-                    // Resmin butona sağ üst köşesine hizalayın
-                    button.ImageAlign = ContentAlignment.MiddleRight;
-                }
-
-                // Butonun tıklama olayına dinamik olarak bir işlev ekleyin
-                button.Click += Button_Click;
-
-                // Butonu panele ekleyin
-                Panel.Controls.Add(button);
-            }
+            // Dock.Top kartlar sondan başa dizilir, o yüzden ters sırayla eklenir ki liste sıralamayla aynı görünsün
+            foreach (Record r in Enumerable.Reverse(Results)) Panel.Controls.Add(ArchiveMain.CreateTitleButton(r, Button_Click));
         }
 
-        private void Button_Click(object sender, EventArgs e)
-        {
-            Button clickedButton = (Button)sender; // Buton nesnesine dönüştürün
-            string buttonText = clickedButton.Text; // Butonun metnini alın
-
-            Data Dataform = new Data();
-
-            Dataform.titleText = buttonText;
-            Dataform.path = path + buttonText;
-
-            // Yeni formun başlangıç konumunu manuel olarak ayarlayın
-            Dataform.StartPosition = FormStartPosition.Manual;
-            Dataform.Location = this.Location;
-
-            Dataform.Show();
-
-        }
-
+        private void Button_Click(object sender, EventArgs e) => ArchiveMain.OpenData((string)((Button)sender).Tag, this);
 
         private void Panel_Paint(object sender, PaintEventArgs e)
         {

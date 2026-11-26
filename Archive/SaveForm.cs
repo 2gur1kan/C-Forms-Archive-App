@@ -11,6 +11,11 @@ using System.IO;
 
 namespace Archive
 {
+    /// <summary>
+    /// yeni kayıt ekleme ve mevcut kaydı düzenleme formu
+    /// editId doluysa düzenleme modunda açılır, boşsa yeni kayıt olur
+    /// resimler kaydedilene kadar bellekte tutulur, vazgeçilirse veri tabanına hiçbir şey yazılmaz
+    /// </summary>
     public partial class SaveForm : Form
     {
         public SaveForm()
@@ -18,214 +23,201 @@ namespace Archive
             InitializeComponent();
         }
 
-        // Dosya adını belirle ve dosya yolunu oluştur
-        string archivePath = ArchiveMain.archivePath;
-        string dataPath = ArchiveMain.dataPath;
-        string titleDataBaseName = ArchiveMain.titleDataBaseName;
-        public List<string> tags = new List<string>();
+        private const string linkHint = "Link"; // link kutusunun designer'daki varsayılan yazısı
 
-        string titlePath;
-        string[] selectedImages;
+        // yerleşim ayarları
+        private int leftPercent = 55; // sol sütunun (link, puan, açıklama) genişlik yüzdesi
+        private int pictureEdgePercent = 40; // resim kutusunun sağ sütundaki yükseklik yüzdesi
+        private int saveH = 52;
+
+        // resim butonlarının ölçüleri (resim kutusunun altına iki satır)
+        private int rowGap = 4;
+        private int rowH = 26;
+        private int navW = 34;
+        private int moveW = 74;
+        private int addW = 80;
+        private int delW = 60;
+        private int coverW = 110;
+        private float rowFont = 9f;
+
+        public string editId; // doluysa bu kayıt düzenlenir
+        public List<string> tags = new List<string>(); // seçilebilecek taglar
+
         List<string> selectedTags = new List<string>();
+        List<byte[]> imageList = new List<byte[]>(); // sıra 0 = kapak resmi
+        int imgIndex = 0;
+
+        Label countLabel;
+        Panel imageBar;
 
         private void SaveForm_Load(object sender, EventArgs e)
         {
-            Sizer();
+            ArchiveMain.Sizer(this);
+            ArchiveMain.FillRate(Rate);
 
-            //dosya adına sahip bir kolasör vermı ona bakar
-            titlePath = Path.Combine(Environment.CurrentDirectory, archivePath + titleDataBaseName);
+            ArchiveMain.ApplyTheme(this);
+            StyleSave();
+            SizeChanged += (s, ev) => LayoutSave(); // pencere boyutu değişince yerleşim yenilenir
 
-            try
-            {
-                // Dosya zaten varsa üzerine yazar, yoksa oluşturur
-                if (!File.Exists(titlePath))
-                {
-                    // Dosya yoksa oluştur
-                    using (FileStream fs = File.Create(titlePath)) { }
-                }
-            }
-            catch (Exception ex)
-            {
-                // Hata durumunda hata mesajını göster
-                MessageBox.Show("Hata: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            Link.Enter += (s, ev) => { if (Link.Text == linkHint) Link.Text = ""; }; // yer tutucu yazı tıklayınca silinir
+            Link.Leave += (s, ev) => { if (Link.Text.Trim() == "") Link.Text = linkHint; };
 
-            foreach (string tag in tags)
-            {
-                Tags.Items.Add(tag);
-            }
+            if (editId != null) LoadForEdit();
 
-            //set rate
-            string[] ranges = new string[] { "0", "1", "2", "3", "4", "5" };
-            Rate.Items.AddRange(ranges);
-            Rate.DropDownStyle = ComboBoxStyle.DropDownList;
-            Rate.Text = "0";
-
-
-        } 
-
-        private void Sizer()
-        {
-            System.Drawing.Rectangle rec = Screen.PrimaryScreen.WorkingArea;
-            this.Size = new System.Drawing.Size(Convert.ToInt32(.5f * rec.Width), Convert.ToInt32(.5f * rec.Height));
-            this.Location = new System.Drawing.Point(10, 10);
-        }
-
-        private void Save_Click(object sender, EventArgs e)
-        {
-            try // başlığı sisteme kaydeder (sonradan arama yparken kolaylık olsun diye)
-            {
-                if (!string.IsNullOrWhiteSpace(Title.Text) && Title.Text.Length >= 3) // veri 3 karkaterden fazla karaktere sahip olmalı
-                {
-                    if (!IsThereATitle(Title.Text)) //veri dosyada varmı kontrol et
-                    {
-                        // StreamWriter nesnesi oluştur ve dosyayı aç
-                        using (StreamWriter sw = new StreamWriter(titlePath, true))
-                        {
-                            // Veriyi dosyaya yaz
-                            sw.WriteLine(Title.Text);
-                        }
-
-                        try // kalan veriyi kaydeden kısım 
-                        {
-                            string DataPath = Path.Combine(Environment.CurrentDirectory, archivePath + dataPath + Title.Text);
-
-                            try
-                            {
-                                // Klasör zaten varsa oluşturma
-                                if (!Directory.Exists(DataPath))
-                                {
-                                    // Klasörü oluştur
-                                    Directory.CreateDirectory(DataPath);
-
-                                    // verilerin kayıtı
-                                    {
-                                        File.WriteAllText(DataPath + "\\Data.txt", string.Empty);//dosya yazılı ise önceden sıfırlar
-
-                                        // StreamWriter nesnesi oluştur ve dosyayı aç
-                                        using (StreamWriter sw = new StreamWriter(DataPath + "\\Data.txt", true))
-                                        {
-                                            // rate i kaydet
-                                            sw.WriteLine(Rate.Text);
-
-                                            // Başlığı dosyaya yaz
-                                            sw.WriteLine(Title.Text);
-
-                                            if(Link.Text != "Link")
-                                            {
-                                                // linki kaydet
-                                                sw.WriteLine(Link.Text);
-                                            }
-                                            else
-                                            {
-                                                // link yazılmamışsa boşluk yaz
-                                                sw.WriteLine("                                                                    ");
-                                            }
-                                        }
-                                    }
-
-                                    // Info txt kayıt
-                                    {
-                                        File.WriteAllText(DataPath + "\\Info.txt", string.Empty);//dosya yazılı ise önceden sıfırlar
-
-                                        // StreamWriter nesnesi oluştur ve dosyayı aç
-                                        using (StreamWriter sw = new StreamWriter(DataPath + "\\Info.txt", true))
-                                        {
-                                            // açıklamayı dosyaya yaz
-                                            sw.WriteLine(Info.Text);
-                                        }
-                                    }
-
-                                    // tagleri kaydeder
-                                    {
-                                        File.WriteAllText(DataPath + "\\Tags.txt", string.Empty);//dosya yazılı ise önceden sıfırlar
-
-                                        // StreamWriter nesnesi oluştur ve dosyayı aç
-                                        using (StreamWriter sw = new StreamWriter(DataPath + "\\Tags.txt", true))
-                                        {
-                                            while(selectedTags.Count > 0)
-                                            {
-                                                // açıklamayı dosyaya yaz
-                                                sw.WriteLine(selectedTags[0]);
-                                                selectedTags.RemoveAt(0);
-                                            }
-                                        }
-                                    }
-
-                                    // Resimler klasörü oluştur
-                                    Directory.CreateDirectory(DataPath + "\\Images");
-                                    ProcessImages(DataPath + "\\Images");
-
-                                    MessageBox.Show("Veri başarıyla kaydedildi.", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                }
-                                else
-                                {
-                                    Console.WriteLine("Klasör zaten var: " + DataPath);
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine("Hata: " + ex.Message);
-                            }
-
-                        }
-                        catch (Exception ex)
-                        {
-                            // Hata durumunda hata mesajını göster
-                            MessageBox.Show("Hata: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-
-                        MessageBox.Show("Başlık başarıyla kaydedildi.", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    else
-                    {
-                        MessageBox.Show("Bulunan başlık!! Lütfen yeni bir başlık giriniz", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("Lütfen en az 3 karakter içeren bir metin girin.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                // Hata durumunda hata mesajını göster
-                MessageBox.Show("Hata: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-
-
-           
+            UpdateListBoxes(); // tagleri listeye koyar
+            LayoutSave();
         }
 
         /// <summary>
-        /// başlık varmı yokmu onu kontrol eder
+        /// tema dışı özel görünümler: büyük başlık kutusu, kaydet butonu, etiket yazıları
         /// </summary>
-        /// <param name="arananMetin"></param>
-        /// <returns></returns>
-        private bool IsThereATitle(string Title)
+        private void StyleSave()
         {
-            // Dosyanın içeriğini satır satır oku
-            using (StreamReader sr = new StreamReader(titlePath))
-            {
-                string line;
-                while ((line = sr.ReadLine()) != null)
-                {
-                    // Aranan metni içeren bir satır bulunursa true döndür
-                    if (line.Contains(Title))
-                    {
-                        return true;
-                    }
-                }
-            }
-            // Aranan metin dosyada bulunamazsa false döndür
-            return false;
+            Title.Font = ArchiveMain.F(16f, FontStyle.Bold);
+            Link.BackColor = ArchiveMain.surface2Color;
+            Link.ForeColor = ArchiveMain.accentHoverColor;
+            Link.Font = ArchiveMain.F(11.5f);
+
+            rateLabel.Text = "Puan";
+            TagsLabel.Text = "Taglar  (tıkla: ekle / çıkar)";
+            rateLabel.AutoSize = true;
+            TagsLabel.AutoSize = true;
+
+            Save.Font = ArchiveMain.F(12f, FontStyle.Bold);
+            Save.Dock = DockStyle.Bottom;
+            Save.Height = saveH;
+
+            Picture.BackColor = ArchiveMain.surfaceColor;
+            Picture.SizeMode = PictureBoxSizeMode.Zoom;
         }
 
-        private void Picture_Click(object sender, EventArgs e)
+        /// <summary>
+        /// kontrolleri pencere boyuna göre dizer: üstte başlık, solda link/puan/açıklama, sağda resim ve tag listeleri
+        /// </summary>
+        private void LayoutSave()
         {
-            SelectImages();
+            int w = ClientSize.Width;
+            int pad = ArchiveMain.pad;
+            int gap = ArchiveMain.gap;
+
+            Title.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+            Title.Dock = DockStyle.None;
+            Title.SetBounds(pad, pad, w - 2 * pad, Title.Height);
+
+            // sol sütun
+            int lw = (w - 3 * pad) * leftPercent / 100;
+            int bottom = Save.Top - pad;
+
+            Link.SetBounds(pad, Title.Bottom + gap, lw, Link.Height);
+
+            rateLabel.Location = new Point(pad, Link.Bottom + gap + 4);
+            Rate.SetBounds(rateLabel.Right + gap, Link.Bottom + gap, 70, Rate.Height);
+
+            Info.SetBounds(pad, Rate.Bottom + gap, lw, Math.Max(40, bottom - (Rate.Bottom + gap)));
+
+            // sağ sütun: resim, resim butonları, tag etiketi, iki tag listesi
+            int x0 = pad * 2 + lw;
+            int rw = Math.Max(120, w - x0 - pad);
+            int top = Link.Top;
+            int avail = bottom - top;
+            int barH = 2 * rowH + rowGap;
+
+            Picture.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+            Picture.SetBounds(x0, top, rw, Math.Max(60, avail * pictureEdgePercent / 100));
+
+            TagsLabel.Location = new Point(x0, Picture.Bottom + rowGap + barH + gap);
+
+            int listTop = TagsLabel.Bottom + rowGap;
+            int half = (rw - gap) / 2;
+            Tags.SetBounds(x0, listTop, half, Math.Max(40, bottom - listTop));
+            SelectedTags.SetBounds(x0 + half + gap, listTop, half, Tags.Height);
         }
+
+        /// <summary>
+        /// resim butonları pencere tamamen yerleştikten sonra kurulur, sağa dayalı resim kutusunun gerçek konumuna göre dizilsinler
+        /// </summary>
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+
+            BuildImageUI();
+            ShowCurrentImage();
+        }
+
+        /// <summary>
+        /// düzenleme modunda mevcut kaydın bilgilerini forma doldurur, kayıt yoksa formu kapatır
+        /// </summary>
+        private void LoadForEdit()
+        {
+            Record gg = ArchiveDB.Instance.GetRecord(editId);
+
+            if (gg == null)
+            {
+                ArchiveMain.ShowError("Kayıt bulunamadı.");
+                Close();
+                return;
+            }
+
+            Text = "Kaydı Düzenle";
+            Title.Text = gg.Title;
+            Link.Text = gg.Link != "" ? gg.Link : linkHint;
+            Info.Text = gg.Info;
+            Rate.Text = gg.Rate.ToString();
+
+            selectedTags = gg.Tags;
+            tags.RemoveAll(tg => selectedTags.Contains(tg)); // seçili olanlar sol listede görünmesin
+
+            imageList = ArchiveDB.Instance.GetImages(editId);
+        }
+
+        ////////////////////// kayıt
+        /// <summary>
+        /// formdaki verileri kaydeder (yeni ya da güncelleme), başlık kısa veya zaten kayıtlıysa hata verip çıkar
+        /// başarılı olursa form kapanır
+        /// </summary>
+        private void Save_Click(object sender, EventArgs e)
+        {
+            string gg = Title.Text.Trim();
+
+            if (gg.Length < ArchiveMain.minTitleLength)
+            {
+                ArchiveMain.ShowError("Lütfen en az " + ArchiveMain.minTitleLength + " karakter içeren bir metin girin.");
+                return;
+            }
+
+            try
+            {
+                if (ArchiveDB.Instance.TitleExists(gg, editId))
+                {
+                    ArchiveMain.ShowError("Bulunan başlık!! Lütfen yeni bir başlık giriniz");
+                    return;
+                }
+
+                Record r = new Record();
+                r.Id = editId;
+                r.Title = gg;
+                r.Link = Link.Text == linkHint ? "" : Link.Text.Trim(); // link yazılmamışsa boş kalır
+                r.Info = Info.Text.TrimEnd();
+                r.Tags = new List<string>(selectedTags);
+                r.Images = imageList;
+
+                int rate;
+                int.TryParse(Rate.Text, out rate);
+                r.Rate = Math.Max(0, Math.Min(ArchiveMain.maxRate, rate));
+
+                if (editId == null) ArchiveDB.Instance.AddRecord(r);
+                else ArchiveDB.Instance.UpdateRecord(r);
+
+                MessageBox.Show("Veri başarıyla kaydedildi.", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Close();
+            }
+            catch (Exception ex)
+            {
+                ArchiveMain.ShowError("Hata: " + ex.Message);
+            }
+        }
+
+        private void Picture_Click(object sender, EventArgs e) => AddImages();
 
         private void Title_TextChanged(object sender, EventArgs e)
         {
@@ -237,110 +229,179 @@ namespace Archive
 
         }
 
+        ////////////////////// resimler
         /// <summary>
-        /// resimleri seçmemizi sağlar // resimlerin ebadlanması gerek
+        /// resim kutusunun altına gezinme, taşıma, ekleme, silme ve kapak butonlarını kurar
+        /// butonlar bir panelin içindedir, panel resim kutusunu takip eder (ekran ölçeklemesinde kaymasın)
         /// </summary>
-        private void SelectImages()
+        private void BuildImageUI()
         {
-            // OpenFileDialog oluştur
-            using (OpenFileDialog openFileDialog = new OpenFileDialog())
-            {
-                // Dosya seçim iletişim kutusu başlığı
-                openFileDialog.Title = "Resim Seç";
+            int barH = 2 * rowH + rowGap;
 
-                // Yalnızca resim dosyalarını filtrele
-                openFileDialog.Filter = "Resim Dosyaları (*.jpg;*.jpeg;*.png;*.gif)|*.jpg;*.jpeg;*.png;*.gif";
+            imageBar = new Panel();
+            imageBar.Height = barH;
+            imageBar.BackColor = ArchiveMain.bgColor;
+            Controls.Add(imageBar);
+            imageBar.BringToFront(); // ölçekleme sonrası açıklama kutusuyla çakışsa bile butonlar önde kalsın
 
-                // Birden fazla dosya seçimini etkinleştir
-                openFileDialog.Multiselect = true;
+            Picture.LocationChanged += (s, ev) => FollowPicture();
+            Picture.SizeChanged += (s, ev) => FollowPicture();
+            FollowPicture();
 
-                // Kullanıcı dosyaları seçtikten sonra
-                if (openFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    // Seçilen dosyaların yollarını geri döndür
-                    selectedImages = openFileDialog.FileNames;
+            AddRowButton("<", 0, 0, navW, (s, ev) => Browse(-1));
+            AddRowButton(">", navW, 0, navW, (s, ev) => Browse(1));
+            AddRowButton("Taşı <", 2 * navW + rowGap, 0, moveW, (s, ev) => MoveImage(-1));
+            AddRowButton("Taşı >", 2 * navW + moveW + rowGap, 0, moveW, (s, ev) => MoveImage(1));
 
-                    // seçilen ilk resmi açar
-                    Picture.SizeMode = PictureBoxSizeMode.Zoom;
-                    Picture.Image = Image.FromFile(selectedImages[0]);
-                }
-            }
+            int y2 = rowH + rowGap;
+            AddRowButton("Ekle", 0, y2, addW, (s, ev) => AddImages());
+            AddRowButton("Sil", addW, y2, delW, (s, ev) => RemoveImage());
+            AddRowButton("Kapak yap", addW + delW, y2, coverW, (s, ev) => MakeCover());
+
+            countLabel = ArchiveMain.MakeLabel("", 2 * navW + 2 * moveW + 2 * rowGap + 4, 4);
+            countLabel.Font = ArchiveMain.F(rowFont);
+            imageBar.Controls.Add(countLabel);
+        }
+
+        private void FollowPicture()
+        {
+            imageBar.Location = new Point(Picture.Left, Picture.Bottom + rowGap);
+            imageBar.Width = Picture.Width;
+        }
+
+        private void AddRowButton(string text, int x, int y, int w, EventHandler click)
+        {
+            Button gg = ArchiveMain.MakeButton(text, x, y, w, rowH, click);
+            gg.Font = ArchiveMain.F(rowFont, FontStyle.Bold);
+            imageBar.Controls.Add(gg);
         }
 
         /// <summary>
-        /// seçilen resimleri klasöre kopyalar
+        /// seçili resmi gösterir, önceki resmi bellekten atar, resim yoksa alan boş kalır
         /// </summary>
-        /// <param name="path"></param>
-        private void ProcessImages(string path)
+        private void ShowCurrentImage()
         {
-            int i = 0;
+            Image gg = Picture.Image;
 
-            // Seçilen her dosya için işlem yap
-            foreach (string file in selectedImages)
+            imgIndex = Math.Max(0, Math.Min(imageList.Count - 1, imgIndex));
+            Picture.Image = imageList.Count > 0 ? ArchiveMain.ImageFromBytes(imageList[imgIndex]) : null;
+
+            gg?.Dispose();
+
+            countLabel.Text = imageList.Count == 0 ? "Resim yok (kutuya tıkla)" : (imgIndex + 1) + " / " + imageList.Count + (imgIndex == 0 ? "  kapak" : "");
+        }
+
+        private void Browse(int delta)
+        {
+            int to = imgIndex + delta;
+            if (to < 0 || to >= imageList.Count) return;
+
+            imgIndex = to;
+            ShowCurrentImage();
+        }
+
+        /// <summary>
+        /// resim dosyalarını seçtirir, büyükler küçültülüp belleğe alınır, geçersiz dosya atlanır
+        /// </summary>
+        private void AddImages()
+        {
+            using (OpenFileDialog gg = new OpenFileDialog())
             {
-                try
-                {
-                    // resmin adını belirle
-                    string fileName = "\\" + i + ".jpg";
+                gg.Title = "Resim Seç";
+                gg.Filter = "Resim Dosyaları (*.jpg;*.jpeg;*.png;*.gif)|*.jpg;*.jpeg;*.png;*.gif";
+                gg.Multiselect = true;
 
-                    // Dosyayı hedef klasöre kopyala
-                    File.Copy(file, path + fileName);
+                if (gg.ShowDialog() != DialogResult.OK) return;
 
-                    i++;
-                }
-                catch (Exception ex)
+                int first = imageList.Count;
+
+                foreach (string file in gg.FileNames)
                 {
-                    // Hata durumunda hata mesajını göster
-                    MessageBox.Show("Hata: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    try
+                    {
+                        imageList.Add(ArchiveDB.PrepareImage(file));
+                    }
+                    catch (Exception ex)
+                    {
+                        ArchiveMain.ShowError(Path.GetFileName(file) + " eklenemedi: " + ex.Message);
+                    }
                 }
+
+                if (imageList.Count > first) imgIndex = first; // eklenen ilk resmi gösterir
+                ShowCurrentImage();
             }
         }
 
-        private void Tags_SelectedIndexChanged(object sender, EventArgs e)
+        private void RemoveImage()
         {
-            // Seçilen öğeyi işle
-            int index = Tags.SelectedIndex;
+            if (imageList.Count == 0) return;
 
-            if(index > -1)
-            {
-                selectedTags.Add(tags[index]);
-                tags.RemoveAt(index);
-            }
-
-            UpdateListBoxes();
+            imageList.RemoveAt(imgIndex);
+            ShowCurrentImage();
         }
 
-        private void SelectedTags_SelectedIndexChanged(object sender, EventArgs e)
+        /// <summary>
+        /// seçili resmi bir sıra öne (-1) ya da geriye (+1) taşır
+        /// </summary>
+        private void MoveImage(int delta)
         {
-            // Seçilen öğeyi işle
-            int index = SelectedTags.SelectedIndex;
+            int to = imgIndex + delta;
+            if (to < 0 || to >= imageList.Count) return;
 
-            if (index > -1)
-            {
-                tags.Add(selectedTags[index]);
-                selectedTags.RemoveAt(index);
-            }
+            byte[] gg = imageList[imgIndex];
+            imageList[imgIndex] = imageList[to];
+            imageList[to] = gg;
+
+            imgIndex = to;
+            ShowCurrentImage();
+        }
+
+        /// <summary>
+        /// seçili resmi başa alır, 0. sıradaki resim kapak olur (listelerde bu görünür)
+        /// </summary>
+        private void MakeCover()
+        {
+            if (imgIndex <= 0) return;
+
+            byte[] gg = imageList[imgIndex];
+            imageList.RemoveAt(imgIndex);
+            imageList.Insert(0, gg);
+
+            imgIndex = 0;
+            ShowCurrentImage();
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            Picture.Image?.Dispose();
+            base.OnFormClosed(e);
+        }
+
+        ////////////////////// taglar
+        private void Tags_SelectedIndexChanged(object sender, EventArgs e) => MoveTag(tags, selectedTags, Tags.SelectedIndex);
+
+        private void SelectedTags_SelectedIndexChanged(object sender, EventArgs e) => MoveTag(selectedTags, tags, SelectedTags.SelectedIndex);
+
+        /// <summary>
+        /// seçilen tagi bir listeden diğerine taşır, seçim yoksa (index -1) bir şey yapmaz
+        /// </summary>
+        private void MoveTag(List<string> from, List<string> to, int index)
+        {
+            if (index < 0) return;
+
+            to.Add(from[index]);
+            from.RemoveAt(index);
 
             UpdateListBoxes();
         }
 
         private void UpdateListBoxes()
         {
-            // Listbox'ları temizle
             Tags.Items.Clear();
             SelectedTags.Items.Clear();
 
-            // tags listesindeki öğeleri Tags listbox'ına ekleyin
-            foreach (string tag in tags)
-            {
-                Tags.Items.Add(tag);
-            }
-
-            // selectedTags listesindeki öğeleri SelectedTags listbox'ına ekleyin
-            foreach (string tag in selectedTags)
-            {
-                SelectedTags.Items.Add(tag);
-            }
+            foreach (string tag in tags) Tags.Items.Add(tag);
+            foreach (string tag in selectedTags) SelectedTags.Items.Add(tag);
         }
 
         private void TagsLabel_Click(object sender, EventArgs e)
